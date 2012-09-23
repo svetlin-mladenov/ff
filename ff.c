@@ -94,7 +94,7 @@ const char *ff_device_name(void) {
 	return "ff";
 }
 
-dev_t ff_create_dev_region(dev_t *region) {
+int ff_create_dev_region(dev_t *region) {
 	int result = -1;
 	if (ff_major) {
 		*region = MKDEV(ff_major, ff_minor);
