@@ -23,6 +23,20 @@ module_param(ff_minor, int, S_IRUGO);
 #define FF_MODULE_NAME "ff"
 
 static struct class *ff_class = NULL;
+static dev_t ff_devno;
+/**********************************
+ * General purpose macros
+ **********************************/
+
+#define DEL(resource, dtor, ...) \
+	if (resource) {\
+		dtor(resource, ##__VA_ARGS__); \
+		resource = NULL; \
+	}
+
+/**********************************
+ * Macros used to fill the user's buffer with the pattern
+ **********************************/
 
 #define __PUT(type, pattern, buff) \
 	put_user((type)pattern, (type __user *)buf);
@@ -114,7 +128,7 @@ int setup_ff_cdev(dev_t region) {
 		goto fail;
 	}
 
-	device = device_create(NULL, NULL /*no parent device*/, region, NULL /*no additional data*/, ff_device_name());
+	device = device_create(ff_class, NULL /*no parent device*/, region, NULL /*no additional data*/, ff_device_name());
 	if (IS_ERR(device)) {
 		err = PTR_ERR(device);
 		device = NULL;
@@ -137,16 +151,15 @@ int setup_ff_cdev(dev_t region) {
 }
 
 int __init ff_init(void) {
-	dev_t dev;
 	int result = -1;
 
-	result = ff_create_dev_region(&dev);
+	result = ff_create_dev_region(&ff_devno);
 	if (result < 0) {
 		printk(KERN_ERR "Cannot get a new chardev region");
 		goto error;
 	}
 
-	result = setup_ff_cdev(dev);
+	result = setup_ff_cdev(ff_devno);
 	if (result < 0) {
 		printk(KERN_ERR "Cannot setup a the new chardev");
 		goto error;
@@ -158,7 +171,15 @@ error:
 	return result;
 }
 
+void ff_cleanup(void) {
+	DEL(ff_class, device_destroy, ff_devno);
+	DEL(ff_cdev, cdev_del);
+	DEL(ff_class, class_destroy);
+	unregister_chrdev_region(ff_devno, 1);
+}
+
 void __exit ff_exit(void) {
+	ff_cleanup();
 }
 
 module_init(ff_init);
