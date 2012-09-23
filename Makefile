@@ -14,7 +14,15 @@ modules_install:
 clean:
 	rm -rf *.o *~ core .depend .*.cmd *.ko *.ko.unsigned *.mod.c .tmp_versions Module.symvers modules.order
 
-.PHONY: all modules moduels_install clean
+load:
+	ln -s `pwd`/ff.rules /etc/udev/rules.d/70-ff.rules
+	insmod ff.ko
+
+unload:
+	rmmod ff.ko
+	rm /etc/udev/rules.d/70-ff.rules
+
+.PHONY: all modules moduels_install clean load unload
 
 else
 	#inside the kernel make
