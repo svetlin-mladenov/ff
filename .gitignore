@@ -8,3 +8,4 @@
 modules.order
 .tmp_versions
 Module.symvers
+ff.tests
