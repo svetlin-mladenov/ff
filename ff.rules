@@ -1,0 +1,1 @@
+KERNEL=="ff", MODE="0666"
