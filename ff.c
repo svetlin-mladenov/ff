@@ -172,7 +172,8 @@ error:
 }
 
 void ff_cleanup(void) {
-	DEL(ff_class, device_destroy, ff_devno);
+	if(ff_class)
+		device_destroy(ff_class, ff_devno);
 	DEL(ff_cdev, cdev_del);
 	DEL(ff_class, class_destroy);
 	unregister_chrdev_region(ff_devno, 1);
