@@ -150,8 +150,24 @@ int setup_ff_cdev(dev_t region) {
 	return err;
 }
 
+void init_pattern(void) {
+	unsigned i;
+
+	if ((val & ~0xff) != 0) {
+		printk(KERN_WARNING "ff module's val parameter is bigger then one byte. Ignoring the excess information.\n");
+	}
+	val &= 0xff;
+
+	for (i = 0; i < sizeof(pattern); i++) {
+		pattern <<= 8;
+		pattern |= val;
+	}
+}
+
 int __init ff_init(void) {
 	int err = -1;
+
+	init_pattern();
 
 	err = ff_create_dev_region(&ff_devno);
 	if (err < 0) {
