@@ -95,16 +95,16 @@ const char *ff_device_name(void) {
 }
 
 int ff_create_dev_region(dev_t *region) {
-	int result = -1;
+	int err = -1;
 	if (ff_major) {
 		*region = MKDEV(ff_major, ff_minor);
-		result = register_chrdev_region(*region, 1, FF_MODULE_NAME);
+		err = register_chrdev_region(*region, 1, FF_MODULE_NAME);
 	} else {
-		result = alloc_chrdev_region(region, ff_minor, 1, FF_MODULE_NAME);
+		err = alloc_chrdev_region(region, ff_minor, 1, FF_MODULE_NAME);
 		ff_major = MAJOR(*region);
 	}
 
-	return result;
+	return err;
 }
 
 int setup_ff_cdev(dev_t region) {
@@ -151,16 +151,16 @@ int setup_ff_cdev(dev_t region) {
 }
 
 int __init ff_init(void) {
-	int result = -1;
+	int err = -1;
 
-	result = ff_create_dev_region(&ff_devno);
-	if (result < 0) {
+	err = ff_create_dev_region(&ff_devno);
+	if (err < 0) {
 		printk(KERN_ERR "Cannot get a new chardev region");
 		goto error;
 	}
 
-	result = setup_ff_cdev(ff_devno);
-	if (result < 0) {
+	err = setup_ff_cdev(ff_devno);
+	if (err < 0) {
 		printk(KERN_ERR "Cannot setup a the new chardev");
 		goto error;
 	}
@@ -168,7 +168,7 @@ int __init ff_init(void) {
 	return 0;
 
 error:
-	return result;
+	return err;
 }
 
 void ff_cleanup(void) {
