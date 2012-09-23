@@ -1,6 +1,8 @@
 *.ko
+*.ko.unsigned
 *.o
 .*.ko.cmd
+*.ko.unsigned.cmd
 .*.o.cmd
 *.mod.c
 modules.order
